@@ -1,0 +1,21 @@
+Package: tosae
+Title: Two Occasion Small Area Estimation
+Version: 0.0.1.000
+Authors@R: 
+    person("Shakeel", "Ahmed", , "shakeel.ahmed@sns.nust.edu.pk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-6328-7270"))
+Description: The function estimate is used for following purposes
+             Two Occasion Small Area Estimation Using Direct and Indirect Methods 
+             The method covers small area estimation method by combining surveys conducted on two successive occasions using four strategies. 
+             Strategy 1 (S1) Estimates are produced by combining the two surveys. direct, weighted and post-stratified estimators are produced using combined sample. 
+             Strategy 2 (S2) Direct weighted and post-stratified estimates are produced using individual survey data and the weighted average of the two estimates are obtained. Regression and ratio methods are also used to produce estimates at current occassion to improve efficiency.
+             Strategy 3 (S3) Estimate for population means of the study variable and auxiliary variables are obtained using direct_S2 and regression, ratio, composite regression and composite ratio estimates are obtained. 
+             Strategy 4 (S4)  Estimate for population means of the study variable and auxiliary variables are obtained using direct_S1 and regression, ratio, composite regression and composite ratio estimates are obtained.
+            The function est_size is used to obtained the area level  expected estimated sample sizes for current sample and the combined sample .
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
