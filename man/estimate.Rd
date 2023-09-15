@@ -7,7 +7,7 @@
 estimate(
   data1,
   data2,
-  D,
+  domain,
   n1,
   n2,
   Si = 0.5,
@@ -21,7 +21,7 @@ estimate(
 
 \item{data2}{Data frame consisting var1 area membership variable, var 2 the study variable....}
 
-\item{D}{a vector consisting list of areas in numeric form}
+\item{domain}{a vector consisting list of areas in numeric form}
 
 \item{n1}{sample size selected at first occasion}
 

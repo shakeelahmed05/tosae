@@ -4,14 +4,14 @@
 \alias{est_size}
 \title{Expected Sample Sizes in Small Areas}
 \usage{
-est_size(data1, data2, D, n1, n2, sim)
+est_size(data1, data2, domain, n1, n2, sim)
 }
 \arguments{
 \item{data1}{Data frame consisting var1 area membership variable, var 2 the study variable....}
 
 \item{data2}{Data frame consisting var1 area membership variable, var 2 the study variable....}
 
-\item{D}{a vector consisting list of area}
+\item{domain}{a vector consisting list of area}
 
 \item{n1}{sample size selected at first occasion}
 
@@ -26,6 +26,6 @@ The expected sample sizes in different areas
 Expected Sample Sizes in Small Areas
 }
 \examples{
- est_size(data.frame(var1=c(rep(1,60),rep(2,20),rep(3,20)), var2=rnorm(100,4)),
-data.frame(var1=c(rep(1,30),rep(2,40),rep(3,30)), var2=rnorm(100,4)), c(1,2,3), 30, 30,100)
+ est_size(data.frame(area_1=c(rep(1,60),rep(2,20),rep(3,20)), Y_1=rnorm(100,4)),
+data.frame(area_2=c(rep(1,30),rep(2,40),rep(3,30)), Y_2=rnorm(100,4)), c(1,2,3), 30, 30,100)
 }

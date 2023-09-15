@@ -2,7 +2,7 @@
 #'
 #' @param data1  Data frame consisting var1 area membership variable, var 2 the study variable....
 #' @param data2   Data frame consisting var1 area membership variable, var 2 the study variable....
-#' @param D   a vector consisting list of areas in numeric form
+#' @param domain   a vector consisting list of areas in numeric form
 #' @param n1  sample size selected at first occasion
 #' @param n2 sample size selected at second occasion
 #' @param Si The weight parameter for synthetic estimator  (by defualt si=0.5) 
@@ -69,20 +69,16 @@
 #'#Example 18 Result with strategy=composite_ratio_s4
 #' estimate(data.frame(area_1=c(rep(1,60),rep(2,20),rep(3,20)), Y_1=rnorm(100,4), X_1=rnorm(100,10), weight_1=runif(100)),
 #'data.frame(area_2=c(rep(1,30),rep(2,40),rep(3,30)), Y_2=rnorm(100,4), X_2=rnorm(100,10), weight_2=runif(100)), c(1,2,3), 30, 30,0.3,0.5, strategy='composite_ratio_s4',100)
-estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s1', sim='500'){
-  
+estimate<-function(data1,data2, domain, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s1', sim='500'){
   ee_n_2<-c();ee_n_c<-c();
   for (j in 1:sim){
     sample_1=data1[sample(1:nrow(data1),n1, replace=FALSE),]
     sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
     CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
-    area_2=sample_2$var1
-    area_c=CDS$var1
     n_2<-numeric();n_c<-numeric()
-    D=c(1,2,3)
-    for(i in D){
-      n_2=c(n_2, nrow(sample_2[area_2==i,]))
-      n_c=c(n_c, nrow(CDS[area_c==i,]))
+    for(i in domain){
+      n_2=c(n_2, nrow(sample_2[sample_2$area_2==i,]))
+      n_c=c(n_c, nrow(CDS[CDS$area_1==i,]))
     }
     ee_n_2<-rbind(n_2, ee_n_2)
     ee_n_c<-rbind(n_c, ee_n_c)
@@ -90,12 +86,11 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
   m_n_2<-numeric()
   m_n_c<-numeric()
   
-  for(i in 1:length(D)){
+  for(i in 1:length(domain)){
     m_n_2<-c(m_n_2, mean(ee_n_2[,i]))
     m_n_c<-c(m_n_c, mean(ee_n_c[,i]))
   }
   t_v=qt((1-0.05)/2 + .5, max(1,m_n_c-1))   # tend to t_v if sample size is big enough
-  
    T_b<-c()
   if (strategy=='direct_s1'){
     ee_t_b<-c()
@@ -104,7 +99,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
       sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
       CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
       t_b<-numeric(); T_b<-c()
-      for(i in D){
+      for(i in domain){
         T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
         t_b=c(t_b, sum(CDS[CDS$area_1==i,]$Y_1)/nrow(CDS[CDS$area_1==i,]))
       }
@@ -112,7 +107,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
     }
     M_t_b<-numeric()
     B_t_b<-numeric()
-    for(i in 1:length(D)){
+    for(i in 1:length(domain)){
       B_t_b<-c(B_t_b, mean(ee_t_b[,i]))
       M_t_b<-c(M_t_b, mean((ee_t_b[,i]-T_b[i])^2))
     }
@@ -127,7 +122,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_b_1<-numeric();t_b_2<-numeric(); T_b<-c()
-       for(i in D){
+       for(i in domain){
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
          t_b_2=c(t_b_2, sum(sample_2[sample_2$area_2==i,]$Y_2)/nrow(sample_2[sample_2$area_2==i,]))
@@ -137,7 +132,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s2<-numeric()
      B_t_b_s2<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s2<-c(B_t_b_s2, mean(ee_t_b_s2[,i]))
        M_t_b_s2<-c(M_t_b_s2, mean((ee_t_b_s2[,i]-T_b[i])^2))
      }
@@ -155,7 +150,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_w<-numeric(); T_b<-c()
-       for(i in D){
+       for(i in domain){
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_w=c(t_w, sum(CDS[CDS$area_1==i,]$weight_1*CDS[CDS$area_1==i,]$Y_1)/sum(CDS[CDS$area_1==i,]$weight_1))
        }
@@ -163,7 +158,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_w<-numeric()
      B_t_w<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_w<-c(B_t_w, mean(ee_t_w[,i]))
        M_t_w<-c(M_t_w, mean((ee_t_w[,i]-T_b[i])^2))
      }
@@ -178,7 +173,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_w_1<-numeric();t_w_2<-numeric(); T_b<-c()
-       for(i in D){
+       for(i in domain){
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_w_1=c(t_w_1, sum(sample_1[sample_1$area_1==i,]$weight_1*sample_1[sample_1$area_1==i,]$Y_1)/sum(sample_1[sample_1$area_1==i,]$weight_1))
          t_w_2=c(t_w_2, sum(sample_2[sample_2$area_2==i,]$weight_2*sample_2[sample_2$area_2==i,]$Y_2)/sum(sample_2[sample_2$area_2==i,]$weight_2))
@@ -188,7 +183,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_w_s2<-numeric()
      B_t_w_s2<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_w_s2<-c(B_t_w_s2, mean(ee_t_w_s2[,i]))
        M_t_w_s2<-c(M_t_w_s2, mean((ee_t_w_s2[,i]-T_b[i])^2))
      }
@@ -204,7 +199,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_ps<-numeric(); T_b<-c()
-       for(i in D){
+       for(i in domain){
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_ps=c(t_ps, (sum(CDS[CDS$area_1==i&CDS$stratum_1==1,]$Y_1)
                        +sum(CDS[CDS$Y_1==i&CDS$Y_1==2,]$Y_1))/nrow(CDS[CDS$area_1==i,]))
@@ -214,7 +209,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      
      B_t_ps<-numeric()
      M_t_ps<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_ps<-c(B_t_ps, mean(ee_t_ps[,i]))
        M_t_ps<-c(M_t_ps, mean((ee_t_ps[,i]-T_b[i])^2))
      }
@@ -231,7 +226,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_ps_1<-numeric();t_ps_2<-numeric(); T_b<-c();t_ps_s2=c()
-       for(i in D){
+       for(i in domain){
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_ps_1=c(t_ps_1, (sum(sample_1[sample_1$area_1==i&sample_1$stratum_1==1,]$Y_1)
                            +sum(sample_1[sample_1$area_1==i&sample_1$stratum_1==2,]$Y_1))/nrow(sample_1[sample_1$area_1==i,]))
@@ -244,7 +239,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      
      B_t_ps_s2<-numeric()
      M_t_ps_s2<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_ps_s2<-c(B_t_ps_s2, mean(ee_t_ps_s2[,i]))
        M_t_ps_s2<-c(M_t_ps_s2, mean((ee_t_ps_s2[,i]-T_b[i])^2))
      }
@@ -263,7 +258,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_b_1<-numeric();t_b_2<-numeric(); T_b<-c(); M_x=c()
        tx_b_1<-numeric();tx_b_2<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
@@ -276,7 +271,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s2_reg<-numeric()
      B_t_b_s2_reg<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s2_reg<-c(B_t_b_s2_reg, mean(ee_t_b_s2_reg[,i]) )
        M_t_b_s2_reg<-c(M_t_b_s2_reg, mean((ee_t_b_s2_reg[,i]-T_b[i])^2))
      }
@@ -293,7 +288,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_b_1<-numeric();t_b_2<-numeric(); T_b<-c(); M_x=c()
        tx_b_1<-numeric();tx_b_2<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
@@ -306,7 +301,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s2_r<-numeric()
      B_t_b_s2_r<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s2_r<-c(B_t_b_s2_r, mean(ee_t_b_s2_r[,i]) )
        M_t_b_s2_r<-c(M_t_b_s2_r, mean((ee_t_b_s2_r[,i]-T_b[i])^2))
      }
@@ -324,7 +319,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_b_1<-numeric();t_b_2<-numeric(); T_b<-c(); M_x=c()
        tx_b_1<-numeric();tx_b_2<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
@@ -338,7 +333,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s2_com_reg<-numeric()
      B_t_b_s2_com_reg<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s2_com_reg<-c(B_t_b_s2_com_reg, mean(ee_t_b_s2_com_reg[,i]) )
        M_t_b_s2_com_reg<-c(M_t_b_s2_com_reg, mean((ee_t_b_s2_com_reg[,i]-T_b[i])^2))
      }
@@ -355,7 +350,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_b_1<-numeric();t_b_2<-numeric(); T_b<-c(); M_x=c()
        tx_b_1<-numeric();tx_b_2<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
@@ -369,7 +364,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s2_com_r<-numeric()
      B_t_b_s2_com_r<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s2_com_r<-c(B_t_b_s2_com_r, mean(ee_t_b_s2_com_r[,i]) )
        M_t_b_s2_com_r<-c(M_t_b_s2_com_r, mean((ee_t_b_s2_com_r[,i]-T_b[i])^2))
      }
@@ -387,7 +382,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        T_b<-c(); M_x=c()
        t_b_1<-numeric();t_b_2<-numeric();tx_b_1<-numeric();tx_b_2<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
@@ -402,7 +397,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s3_reg<-numeric()
      B_t_b_s3_reg<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s3_reg<-c(B_t_b_s3_reg, mean(ee_t_b_s3_reg[,i]) )
        M_t_b_s3_reg<-c(M_t_b_s3_reg, mean((ee_t_b_s3_reg[,i]-T_b[i])^2))
      }
@@ -419,7 +414,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        T_b<-c(); M_x=c();t_b_1<-numeric();t_b_2<-numeric();tx_b_1<-numeric();tx_b_2<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
@@ -434,7 +429,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s3_r<-numeric()
      B_t_b_s3_r<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s3_r<-c(B_t_b_s3_r, mean(ee_t_b_s3_r[,i]) )
        M_t_b_s3_r<-c(M_t_b_s3_r, mean((ee_t_b_s3_r[,i]-T_b[i])^2))
      }
@@ -451,7 +446,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        T_b<-c(); M_x=c(); t_b_1<-numeric();t_b_2<-numeric();tx_b_1<-numeric();tx_b_2<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
@@ -468,7 +463,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s3_com_reg<-numeric()
      B_t_b_s3_com_reg<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s3_com_reg<-c(B_t_b_s3_com_reg, mean(ee_t_b_s3_com_reg[,i]) )
        M_t_b_s3_com_reg<-c(M_t_b_s3_com_reg, mean((ee_t_b_s3_com_reg[,i]-T_b[i])^2))
      }
@@ -484,7 +479,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        T_b<-c(); M_x=c(); t_b_1<-numeric();t_b_2<-numeric();tx_b_1<-numeric();tx_b_2<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b_1=c(t_b_1, sum(sample_1[sample_1$area_1==i,]$Y_1)/nrow(sample_1[sample_1$area_1==i,]))
@@ -500,7 +495,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s3_com_r<-numeric()
      B_t_b_s3_com_r<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s3_com_r<-c(B_t_b_s3_com_r, mean(ee_t_b_s3_com_r[,i]) )
        M_t_b_s3_com_r<-c(M_t_b_s3_com_r, mean((ee_t_b_s3_com_r[,i]-T_b[i])^2))
      }
@@ -518,7 +513,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        T_b<-c(); M_x=c()
        t_b<-numeric();tx_b<-numeric();
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b=c(t_b, sum(CDS[CDS$area_1==i,]$Y_1)/nrow(CDS[CDS$area_1==i,]))
@@ -529,7 +524,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s4_reg<-numeric()
      B_t_b_s4_reg<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s4_reg<-c(B_t_b_s4_reg, mean(ee_t_b_s4_reg[,i]) )
        M_t_b_s4_reg<-c(M_t_b_s4_reg, mean((ee_t_b_s4_reg[,i]-T_b[i])^2))
      }
@@ -545,7 +540,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        sample_2=data2[sample(1:nrow(data2),n2, replace=FALSE),]
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_b<-numeric(); T_b<-c(); M_x=c();tx_b<-c()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b=c(t_b, sum(CDS[CDS$area_1==i,]$Y_1)/nrow(CDS[CDS$area_1==i,]))
@@ -557,7 +552,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s4_r<-numeric()
      B_t_b_s4_r<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s4_r<-c(B_t_b_s4_r, mean(ee_t_b_s4_r[,i]) )
        M_t_b_s4_r<-c(M_t_b_s4_r, mean((ee_t_b_s4_r[,i]-T_b[i])^2))
      }
@@ -575,7 +570,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_b<-numeric(); T_b<-c(); M_x=c()
        tx_b<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b=c(t_b, sum(CDS[CDS$area_1==i,]$Y_1)/nrow(CDS[CDS$area_1==i,]))
@@ -588,7 +583,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s4_com_reg<-numeric()
      B_t_b_s4_com_reg<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s4_com_reg<-c(B_t_b_s4_com_reg, mean(ee_t_b_s4_com_reg[,i]) )
        M_t_b_s4_com_reg<-c(M_t_b_s4_com_reg, mean((ee_t_b_s4_com_reg[,i]-T_b[i])^2))
      }
@@ -605,7 +600,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
        CDS=data.frame(rbind(as.matrix(sample_1), as.matrix(sample_2)))
        t_b<-numeric(); T_b<-c(); M_x=c()
        tx_b<-numeric()
-       for(i in D){
+       for(i in domain){
          M_x=c(M_x,mean(data2$X_2))
          T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
          t_b=c(t_b, sum(CDS[CDS$area_1==i,]$Y_1)/nrow(CDS[CDS$area_1==i,]))
@@ -618,7 +613,7 @@ estimate<-function(data1,data2, D, n1,n2, Si=0.5, lmda_1=0.5, strategy='direct_s
      }
      M_t_b_s4_com_r<-numeric()
      B_t_b_s4_com_r<-numeric()
-     for(i in 1:length(D)){
+     for(i in 1:length(domain)){
        B_t_b_s4_com_r<-c(B_t_b_s4_com_r, mean(ee_t_b_s4_com_r[,i]) )
        M_t_b_s4_com_r<-c(M_t_b_s4_com_r, mean((ee_t_b_s4_com_r[,i]-T_b[i])^2))
      }
