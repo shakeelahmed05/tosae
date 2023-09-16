@@ -17,11 +17,15 @@ estimate(
 )
 }
 \arguments{
-\item{data1}{Data frame consisting var1 area membership variable, var 2 the study variable....}
+\item{data1}{Data frame consisting variables:
+area_1=area membership variable, Y_1 the study variable, X_1: The auxiliary variable
+weight_1=sampling weight, stratum_1: stratification variable}
 
-\item{data2}{Data frame consisting var1 area membership variable, var 2 the study variable....}
+\item{data2}{Data frame consisting variables:
+area_2=area membership variable, Y_2 the study variable, X_2: The auxiliary variable
+weight_2=sampling weight, stratum_2: stratification variable}
 
-\item{domain}{a vector consisting list of areas in numeric form}
+\item{domain}{A vector consisting possible values of area variable (for 3 areas we can write c(11, 12, 13))}
 
 \item{n1}{sample size selected at first occasion}
 

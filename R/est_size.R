@@ -1,8 +1,7 @@
 
 #' Expected Sample Sizes in Small Areas
-#'
-#' @param data1  Data frame consisting var1 area membership variable, var 2 the study variable....
-#' @param data2   Data frame consisting var1 area membership variable, var 2 the study variable....
+#' @param data1  Data frame consisting variables: area_1 area membership variable
+#' @param data2   Data frame consisting variables: area_1 area membership variable
 #' @param domain   a vector consisting list of area
 #' @param n1  sample size selected at first occasion
 #' @param n2 sample size selected at second occasion
