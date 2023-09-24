@@ -7,9 +7,15 @@
 est_size(data1, data2, domain, n1, n2, sim)
 }
 \arguments{
+<<<<<<< HEAD
 \item{data1}{Data frame consisting variables: area_1 area membership variable}
 
 \item{data2}{Data frame consisting variables: area_1 area membership variable}
+=======
+\item{data1}{Data frame consisting variables: area_1 area #'membership variable}
+
+\item{data2}{Data frame consisting variables: area_1 area #'membership variable}
+>>>>>>> 4f1fedfd27406e910ad53445f6206defc49fce9e
 
 \item{domain}{a vector consisting list of area}
 
