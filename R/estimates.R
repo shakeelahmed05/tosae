@@ -244,7 +244,7 @@ estimate<-function(data1,data2, domain, n1,n2, Si=0.5, lmda_1=0.5, strategy='dir
           T_b=c(T_b, sum(data2[data2$area_2==i,]$Y_2)/nrow(data2[data2$area_2==i,]))
           t_ps_1=c(t_ps_1, (sum(sample_1[sample_1$area_1==i&sample_1$stratum_1==1,]$Y_1)
                             +sum(sample_1[sample_1$area_1==i&sample_1$stratum_1==2,]$Y_1))/nrow(sample_1[sample_1$area_1==i,]))
-          t_ps_2=c(t_ps_2, (sum(sample_2[sample_2$area_2==i&sample_1$stratum_2==2,]$Y_2)
+          t_ps_2=c(t_ps_2, (sum(sample_2[sample_2$area_2==i&sample_2$stratum_2==2,]$Y_2)
                             +sum(sample_2[sample_2$area_2==i&sample_2$stratum_2==2,]$Y_2))/nrow(sample_2[sample_2$area_2==i,]))
         }
         t_ps_s2=lmda_1*t_ps_1+(1-lmda_1)*t_ps_2
